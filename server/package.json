@@ -1,0 +1,31 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "pnpm run build && node dist/index.js",
+    "build": "npx esbuild ./api/index.ts --bundle --outfile=./dist/index.js --platform=node --format=cjs",
+    "dev": "ts-node-dev --respawn --transpile-only ./api/index.ts"
+  },
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@types/axios": "^0.14.4",
+    "@types/mongoose": "^5.11.97",
+    "axios": "^1.8.1",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "mongoose": "^8.10.2",
+    "nanoid": "^5.1.2"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "dotenv": "^16.4.7",
+    "esbuild": "^0.25.2",
+    "pre-commit": "^1.2.2",
+    "rimraf": "^6.0.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.7.3"
+  }
+}
