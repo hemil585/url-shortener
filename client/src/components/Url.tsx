@@ -46,6 +46,9 @@ export default function Url() {
       toast.error("Failed to shorten URL. Please try again.");
     } finally {
       setIsLoading(false);
+      setTimeout(() => {
+        setOriginalUrl("");
+      }, 3000);
     }
   };
 

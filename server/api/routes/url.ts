@@ -1,16 +1,41 @@
 import express from "express";
 import { nanoid } from 'nanoid'
 import { Url } from "../model/url";
-import axios from "axios";
+import http from 'http'
+import https from 'https'
 
 export const urlRouter = express.Router()
 
 urlRouter.get("/check-url", async (req, res) => {
     const encodedUrl = req.query.url;
-    const url = decodeURIComponent(String(encodedUrl));
+    const urlString = decodeURIComponent(String(encodedUrl));
+
     try {
-        const response = await axios.head(url, { timeout: 3000 });
-        res.json({ success: true, url: response.request.res.responseUrl });
+        const url = new URL(urlString)
+        const client = url.protocol === 'https:' ? https : http;
+
+        const request = client.get(url, { timeout: 5000 }, (response) => {
+            setTimeout(() => {
+                request.destroy();
+            }, 1000);
+
+            const finalUrl = response.headers.location || response.responseUrl || url.href;
+
+            res.json({ success: true, url: finalUrl });
+        });
+
+        request.on('error', (err: Error) => {
+            if (err.code !== 'ECONNRESET') {
+                console.log('Request error:', err.message);
+                res.json({ success: false, error: "Request failed or invalid URL." });
+            }
+        });
+
+        request.setTimeout(5000, () => {
+            request.destroy();
+            res.json({ success: false, error: "URL not found! The link does not exist or is unreachable." });
+        });
+
     } catch (error) {
         res.json({ success: false, error: "URL not found! The link does not exist or is unreachable." });
     }
@@ -20,9 +45,8 @@ urlRouter.post('/getUrl', async (req, res) => {
     const { encodedUrl } = req.body
 
     const originalUrl = decodeURIComponent(String(encodedUrl));
-    const response = await axios.head(originalUrl, { timeout: 3000 });
 
-    const originalUrlExists = await Url.findOne({ originalUrl: response.request.res.responseUrl })
+    const originalUrlExists = await Url.findOne({ originalUrl })
     if (originalUrlExists) {
         res.status(200).json({
             shortenedUrl: process.env.CLIENT_URL + originalUrlExists.shortCode
@@ -38,7 +62,7 @@ urlRouter.post('/getUrl', async (req, res) => {
         shortCodeExists = await Url.findOne({ shortCode })
         if (!shortCodeExists) {
             url = await Url.create({
-                originalUrl: response.request.res.responseUrl, shortCode
+                originalUrl, shortCode
             })
             res.status(200).json({
                 shortenedUrl: process.env.CLIENT_URL + url.shortCode

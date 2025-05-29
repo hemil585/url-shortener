@@ -1,4 +1,4 @@
-import { ArrowRight, Copy } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Copy } from "lucide-react";
 
 interface ShortenedProps {
   shortenedUrl: string;
@@ -40,9 +40,10 @@ export default function Shortened({
             href={shortenedUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs font-semibold underline sm:text-sm text-blue-400 hover:text-blue-300 transition-colors"
+            className="text-xs flex justify-center items-center font-semibold underline sm:text-sm text-blue-400 hover:text-blue-300 transition-colors"
           >
-            Open shortened URL →
+            Open shortened URL
+           <ArrowUpRight size={15} />
           </a>
         </div>
       </div>
